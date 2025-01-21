@@ -7,6 +7,7 @@ import telebot
 import toml
 import logging
 import os
+from telebot.types import ReplyKeyboardMarkup
 from handlers import handle_start, handle_role_selection, handle_client_registration
 telebot.logger.setLevel(logging.DEBUG)
 
@@ -62,11 +63,28 @@ async def process_webhook(update: dict):
         return
 
 
-# Comandos del bot
-@bot.message_handler(commands=['start'])
-def start_command(message):
-    handle_start(bot, message)
-#new command
+@bot.message_handler(commands=['help', 'start'])
+def send_welcome(message):
+    """
+    Handle '/start' and '/help'
+    """
+    try:
+        markup = ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+        markup.add("Entrenador", "Cliente", "Trabajador")
+    except Exception as e:
+        logger.error(e)
+    bot.reply_to(message,
+                 ("Hi there, I am EchoBot.\n"
+                  "I am here to echo your kind words back to you."))
+
+
+@bot.message_handler(func=lambda message: True, content_types=['text'])
+def echo_message(message):
+    """
+    Handle all other messages
+    """
+    bot.reply_to(message, message.text)
+
 
 # Remove webhook, it fails sometimes the set if there is a previous webhook
 bot.remove_webhook()
