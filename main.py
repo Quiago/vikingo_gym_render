@@ -42,7 +42,7 @@ app = fastapi.FastAPI(docs=None, redoc_url=None)
 
 
 @app.post(f'/{API_TOKEN}/')
-def process_webhook(update: dict):
+async def process_webhook(update: dict):
     """
     Process webhook calls
     """
