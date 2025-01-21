@@ -2,7 +2,7 @@
     token = "8082269540:AAGOzwSoL2CLoi_kradgxPl6gN9nmK5zjRU"
 
 [url]
-    render = "vikingo-gym-render.onrender.com"
+    render = "vikingo_gym_render.railway.internal"
     #render = "46aa-139-177-200-40.ngrok-free.app"
 
 #curl -X GET "https://api.telegram.org/bot8082269540:AAGOzwSoL2CLoi_kradgxPl6gN9nmK5zjRU/getWebhookInfo"
