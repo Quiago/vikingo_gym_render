@@ -4,34 +4,28 @@ import uvicorn
 import toml
 
 CONF = toml.load("config.toml")
-token = CONF["telegram"]["token"]
-url = CONF["url"]["render"]
-print(url)
-bot = telebot.TeleBot(token, threaded=False)
-bot.remove_webhook()
-bot.set_webhook(url=url)
+TOKEN = CONF["telegram"]["token"]
+WEBHOOK_URL = CONF["url"]["render"]
 
+bot = telebot.TeleBot(TOKEN, parse_mode=None)
 app = FastAPI()
 
-@app.post("/")
+@app.post("/webhook")
 async def webhook(request: Request):
-    print(request)
     json_str = await request.body()
     update = telebot.types.Update.de_json(json_str.decode("utf-8"))
     bot.process_new_updates([update])
     return {"status": "ok"}
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
-
 @bot.message_handler(commands=['start'])
-def start(message):
-    bot.send_message(message.chat.id, "Hello, World!")
+def send_welcome(message):
+    bot.reply_to(message, "¡Hola! Soy tu bot de Telegram.")
 
-@bot.message_handler(commands=['help'])
-def help(message):
-    bot.send_message(message.chat.id, "Help")
+@bot.message_handler(func=lambda message: True)
+def echo_all(message):
+    bot.reply_to(message, message.text)
 
-#if __name__ == "__main__":
-#    uvicorn.run(app, host="0.0.0.0", port=8000)
+@app.on_event("startup")
+async def on_startup():
+    bot.remove_webhook()
+    bot.set_webhook(url=WEBHOOK_URL)
