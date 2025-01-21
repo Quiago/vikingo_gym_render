@@ -10,6 +10,7 @@ import uvicorn
 import telebot
 import toml
 import logging
+import os
 telebot.logger.setLevel(logging.DEBUG)
 
 
@@ -19,9 +20,10 @@ TOKEN = CONF['telegram']['token']
 URL = CONF['url']['render']
 #URL = "46aa-139-177-200-40.ngrok-free.app"
 API_TOKEN = TOKEN
-
+PORT = int(os.environ.get("PORT", 8443))
+print(PORT)
 WEBHOOK_HOST = URL
-WEBHOOK_PORT = 443  # 443, 80, 88 or 8443 (port need to be 'open')
+WEBHOOK_PORT = PORT  # 443, 80, 88 or 8443 (port need to be 'open')
 WEBHOOK_LISTEN = '0.0.0.0'  # In some VPS you may need to put here the IP addr
 print(URL)
 
