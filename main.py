@@ -1,9 +1,11 @@
 from fastapi import FastAPI, Request
 import telebot
+import uvicorn
+import toml
 
-token = "8082269540:AAGOzwSoL2CLoi_kradgxPl6gN9nmK5zjRU"
-url = "https://<your-app-name>.onrender.com/"
-
+CONF = toml.load("config.toml")
+token = CONF["telegram"]["token"]
+url = CONF["url"]["render"]
 bot = telebot.TeleBot(token, threaded=False)
 bot.remove_webhook()
 bot.set_webhook(url=url)
@@ -24,3 +26,6 @@ def start(message):
 @bot.message_handler(commands=['help'])
 def help(message):
     bot.send_message(message.chat.id, "Help")
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)

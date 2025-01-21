@@ -1,0 +1,5 @@
+[telegram]
+    token = "8082269540:AAGOzwSoL2CLoi_kradgxPl6gN9nmK5zjRU"
+
+[url]
+    render = "https://<your-app-name>.onrender.com/"
