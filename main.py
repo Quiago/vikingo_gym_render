@@ -6,6 +6,7 @@ import toml
 CONF = toml.load("config.toml")
 token = CONF["telegram"]["token"]
 url = CONF["url"]["render"]
+print(url)
 bot = telebot.TeleBot(token, threaded=False)
 bot.remove_webhook()
 bot.set_webhook(url=url)
@@ -27,5 +28,5 @@ def start(message):
 def help(message):
     bot.send_message(message.chat.id, "Help")
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+#if __name__ == "__main__":
+#    uvicorn.run(app, host="0.0.0.0", port=8000)
