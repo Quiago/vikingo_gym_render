@@ -15,10 +15,15 @@ app = FastAPI()
 
 @app.post("/")
 async def webhook(request: Request):
+    print(request)
     json_str = await request.body()
     update = telebot.types.Update.de_json(json_str.decode("utf-8"))
     bot.process_new_updates([update])
     return {"status": "ok"}
+
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
 
 @bot.message_handler(commands=['start'])
 def start(message):
