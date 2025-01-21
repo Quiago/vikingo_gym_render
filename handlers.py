@@ -1,9 +1,9 @@
 from telebot.types import ReplyKeyboardMarkup
 from database import save_client_to_db
 
-USER_STATE = {}  # Diccionario para manejar los estados de los usuarios
+#USER_STATE = {}  # Diccionario para manejar los estados de los usuarios
 
-def handle_start(bot, message):
+def handle_start(bot, message, USER_STATE):
     """
     Maneja el comando /start y muestra los botones iniciales.
     """
@@ -60,6 +60,6 @@ def handle_client_registration(bot, message, USER_STATE):
 
     elif step == "get_membership":
         USER_STATE[message.chat.id]["membership"] = message.text
-        save_client_to_db(USER_STATE[message.chat.id])
+        #save_client_to_db(USER_STATE[message.chat.id])
         bot.send_message(message.chat.id, "¡Registro completado con éxito! 🎉")
         del USER_STATE[message.chat.id]

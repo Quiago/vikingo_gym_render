@@ -1,9 +1,10 @@
 [telegram]
     token = "8082269540:AAGOzwSoL2CLoi_kradgxPl6gN9nmK5zjRU"
+    #token = "7222835162:AAGw-KSbz5CK6dZ7OayQIGRnJU6FCmtAyDE"
 
 [url]
     railway = "vikingogymrender-production.up.railway.app"
-    #railway = "d545-204-187-100-216.ngrok-free.app"
+    #railway = "9d85-204-187-100-216.ngrok-free.app"
 
 #curl -X GET "https://api.telegram.org/bot8082269540:AAGOzwSoL2CLoi_kradgxPl6gN9nmK5zjRU/getWebhookInfo"
 #curl -X POST "https://api.telegram.org/bot8082269540:AAGOzwSoL2CLoi_kradgxPl6gN9nmK5zjRU/deleteWebhook"

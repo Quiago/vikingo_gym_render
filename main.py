@@ -16,29 +16,12 @@ CONF = toml.load('config.toml')
 TOKEN = CONF['telegram']['token']
 URL = CONF['url']['railway']
 API_TOKEN = TOKEN
-PORT = int(os.environ.get("PORT", 8443))
-print(PORT)
 WEBHOOK_HOST = URL
 WEBHOOK_PORT = 8443  # 443, 80, 88 or 8443 (port need to be 'open')
 WEBHOOK_LISTEN = '0.0.0.0'  # In some VPS you may need to put here the IP addr
-print(URL)
-
-WEBHOOK_SSL_CERT = './webhook_cert.pem'  # Path to the ssl certificate
-WEBHOOK_SSL_PRIV = './webhook_pkey.pem'  # Path to the ssl private key
-
-# Quick'n'dirty SSL certificate generation:
-#
-# openssl genrsa -out webhook_pkey.pem 2048
-# openssl req -new -x509 -days 3650 -key webhook_pkey.pem -out webhook_cert.pem
-#
-# When asked for "Common Name (e.g. server FQDN or YOUR name)" you should reply
-# with the same value in you put in WEBHOOK_HOST
-
-#WEBHOOK_URL_BASE = "https://{}:{}".format(WEBHOOK_HOST, WEBHOOK_PORT)
 WEBHOOK_URL_BASE = "https://{}".format(WEBHOOK_HOST)
 WEBHOOK_URL_PATH = "/{}/".format(API_TOKEN)
-print(WEBHOOK_URL_BASE)
-print(WEBHOOK_URL_PATH)
+USER_STATE = {}
 
 logger = telebot.logger
 telebot.logger.setLevel(logging.INFO)
@@ -63,27 +46,18 @@ async def process_webhook(update: dict):
         return
 
 
-@bot.message_handler(commands=['help', 'start'])
-def send_welcome(message):
-    """
-    Handle '/start' and '/help'
-    """
-    try:
-        markup = ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-        markup.add("Entrenador", "Cliente", "Trabajador")
-    except Exception as e:
-        logger.error(e)
-    bot.reply_to(message,
-                 ("Hi there, I am EchoBot.\n"
-                  "I am here to echo your kind words back to you."))
+# Comandos del bot
+@bot.message_handler(commands=['start'])
+def start_command(message):
+    handle_start(bot, message, USER_STATE)
 
+@bot.message_handler(func=lambda message: message.chat.id in USER_STATE and USER_STATE[message.chat.id]["step"] == "role_selection")
+def role_selection_handler(message):
+    handle_role_selection(bot, message, USER_STATE)
 
-@bot.message_handler(func=lambda message: True, content_types=['text'])
-def echo_message(message):
-    """
-    Handle all other messages
-    """
-    bot.reply_to(message, message.text)
+@bot.message_handler(func=lambda message: message.chat.id in USER_STATE and USER_STATE[message.chat.id]["role"] == "Cliente")
+def client_registration_handler(message):
+    handle_client_registration(bot, message, USER_STATE)
 
 
 # Remove webhook, it fails sometimes the set if there is a previous webhook
