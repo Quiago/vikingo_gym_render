@@ -66,7 +66,7 @@ async def process_webhook(update: dict):
 @bot.message_handler(commands=['start'])
 def start_command(message):
     handle_start(bot, message)
-
+#new command
 
 # Remove webhook, it fails sometimes the set if there is a previous webhook
 bot.remove_webhook()
