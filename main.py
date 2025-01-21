@@ -1,8 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
-# This is a simple echo bot using decorators and webhook with fastapi
-# It echoes any incoming text messages and does not use the polling method.
 
 import logging
 import fastapi
@@ -11,14 +7,13 @@ import telebot
 import toml
 import logging
 import os
+from handlers import handle_start, handle_role_selection, handle_client_registration
 telebot.logger.setLevel(logging.DEBUG)
 
 
 CONF = toml.load('config.toml')
 TOKEN = CONF['telegram']['token']
-#TOKEN = "8082269540:AAGOzwSoL2CLoi_kradgxPl6gN9nmK5zjRU"
-URL = CONF['url']['render']
-#URL = "46aa-139-177-200-40.ngrok-free.app"
+URL = CONF['url']['railway']
 API_TOKEN = TOKEN
 PORT = int(os.environ.get("PORT", 8443))
 print(PORT)
@@ -67,22 +62,10 @@ async def process_webhook(update: dict):
         return
 
 
-@bot.message_handler(commands=['help', 'start'])
-def send_welcome(message):
-    """
-    Handle '/start' and '/help'
-    """
-    bot.reply_to(message,
-                 ("Hi there, I am EchoBot.\n"
-                  "I am here to echo your kind words back to you."))
-
-
-@bot.message_handler(func=lambda message: True, content_types=['text'])
-def echo_message(message):
-    """
-    Handle all other messages
-    """
-    bot.reply_to(message, message.text)
+# Comandos del bot
+@bot.message_handler(commands=['start'])
+def start_command(message):
+    handle_start(bot, message)
 
 
 # Remove webhook, it fails sometimes the set if there is a previous webhook
