@@ -40,9 +40,12 @@ bot = telebot.TeleBot(API_TOKEN)
 
 app = fastapi.FastAPI(docs=None, redoc_url=None)
 
+@app.get('/')
+def root():
+    return 'Hello, World!'
 
 @app.post(f'/{API_TOKEN}/')
-async def process_webhook(update: dict):
+def process_webhook(update: dict):
     """
     Process webhook calls
     """
