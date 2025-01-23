@@ -6,9 +6,11 @@ import uvicorn
 import telebot
 import toml
 import logging
-import os
-from telebot.types import ReplyKeyboardMarkup
-from handlers import handle_start, handle_role_selection, handle_client_registration
+from handlers import handle_start, handle_role_selection
+from client import handle_client_registration, show_client_commands
+from worker import handle_worker_registration, show_worker_commands
+from trainer import handle_trainer_registration, show_trainer_commands
+from database import initialize_db, get_role
 telebot.logger.setLevel(logging.DEBUG)
 
 
@@ -22,7 +24,7 @@ WEBHOOK_LISTEN = '0.0.0.0'  # In some VPS you may need to put here the IP addr
 WEBHOOK_URL_BASE = "https://{}".format(WEBHOOK_HOST)
 WEBHOOK_URL_PATH = "/{}/".format(API_TOKEN)
 USER_STATE = {}
-
+initialize_db()
 logger = telebot.logger
 telebot.logger.setLevel(logging.INFO)
 
@@ -55,9 +57,33 @@ def start_command(message):
 def role_selection_handler(message):
     handle_role_selection(bot, message, USER_STATE)
 
-@bot.message_handler(func=lambda message: message.chat.id in USER_STATE and USER_STATE[message.chat.id]["role"] == "Cliente")
+@bot.message_handler(func=lambda message: message.chat.id in USER_STATE and USER_STATE[message.chat.id]["role"] == "cliente")
 def client_registration_handler(message):
     handle_client_registration(bot, message, USER_STATE)
+
+@bot.message_handler(func=lambda message: message.chat.id in USER_STATE and USER_STATE[message.chat.id]["role"] == "trabajador")
+def worker_registration_handler(message):
+    handle_worker_registration(bot, message, USER_STATE)
+
+@bot.message_handler(func=lambda message: message.chat.id in USER_STATE and USER_STATE[message.chat.id]["role"] == "entrenador")
+def trainer_registration_handler(message):
+    handle_trainer_registration(bot, message, USER_STATE)
+
+@bot.message_handler(commands=['menu'])
+def show_menu_command(message):
+    role = get_role(message.chat.id)
+    if not role:
+        bot.send_message(message.chat.id, "Not user register please register")
+        start_command(message)
+    else:
+        if role == "cliente":
+            show_client_commands(bot, message.chat.id)
+        elif role == "trabajador":
+            show_worker_commands(bot, message.chat.id)
+        elif role == "entrenador":
+            show_trainer_commands(bot, message.chat.id)
+        else:
+            bot.send_message(message.chat.id, "Por favor, regístrate primero usando /start.")
 
 
 # Remove webhook, it fails sometimes the set if there is a previous webhook
