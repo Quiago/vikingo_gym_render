@@ -3,8 +3,8 @@ from datetime import datetime
 
 
 # PostgreSQL connection URL
-#DATABASE_URL = "postgresql+psycopg2://postgres:kALssRbWZylChNDDJuSxcONXxLwXtVLM@postgres.railway.internal:5432/railway"
-DATABASE_URL = "postgresql+psycopg2://dwh_ingestion:bBHy5fDtaE!3rNM2123443412fd*@51.79.102.5:5433/dhw_demo_de"
+DATABASE_URL = "postgresql+psycopg2://postgres:kALssRbWZylChNDDJuSxcONXxLwXtVLM@postgres.railway.internal:5432/railway"
+#DATABASE_URL = "postgresql+psycopg2://dwh_ingestion:bBHy5fDtaE!3rNM2123443412fd*@51.79.102.5:5433/dhw_demo_de"
 # Initialize the database engine
 engine = create_engine(DATABASE_URL)
 
