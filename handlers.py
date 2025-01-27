@@ -20,15 +20,15 @@ def handle_role_selection(bot, message, USER_STATE):
     if message.text == "Cliente":
         USER_STATE[message.chat.id]["role"] = "cliente"
         USER_STATE[message.chat.id]["step"] = "get_name"
-        bot.send_message(message.chat.id, "Por favor, ingresa tu primer nombre:")
+        bot.send_message(message.chat.id, "Por favor, ingresa tu primer nombre: 👤")
     if message.text == "Trabajador":
         USER_STATE[message.chat.id]["role"] = "trabajador"
         USER_STATE[message.chat.id]["step"] = "get_name"
-        bot.send_message(message.chat.id, "Por favor, ingresa tu primer nombre:")
+        bot.send_message(message.chat.id, "Por favor, ingresa tu primer nombre: 👤")
     if message.text == "Entrenador":
         USER_STATE[message.chat.id]["role"] = "entrenador"
         USER_STATE[message.chat.id]["step"] = "get_name"
-        bot.send_message(message.chat.id, "Por favor, ingresa tu primer nombre:")
+        bot.send_message(message.chat.id, "Por favor, ingresa tu primer nombre: 👤")
 
 
 

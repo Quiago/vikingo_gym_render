@@ -1,8 +1,10 @@
 from sqlalchemy import create_engine, text
+from datetime import datetime
+
 
 # PostgreSQL connection URL
-DATABASE_URL = "postgresql://postgres:kALssRbWZylChNDDJuSxcONXxLwXtVLM@postgres.railway.internal:5432/railway"
-
+#DATABASE_URL = "postgresql+psycopg2://postgres:kALssRbWZylChNDDJuSxcONXxLwXtVLM@postgres.railway.internal:5432/railway"
+DATABASE_URL = "postgresql+psycopg2://dwh_ingestion:bBHy5fDtaE!3rNM2123443412fd*@51.79.102.5:5433/dhw_demo_de"
 # Initialize the database engine
 engine = create_engine(DATABASE_URL)
 
@@ -16,6 +18,18 @@ def initialize_db():
         CREATE TABLE IF NOT EXISTS users (
             chat_id TEXT PRIMARY KEY,
             role TEXT NOT NULL
+        );
+        """))
+
+        connection.execute(text("""
+        CREATE TABLE IF NOT EXISTS progress (
+            chat_id TEXT NOT NULL,
+            measure_date TEXT NOT NULL,
+            age TEXT NOT NULL,
+            weight TEXT NULL,
+            height TEXT NULL,
+            imc TEXT NULL,
+            corporal_fat TEXT NULL
         );
         """))
 
@@ -64,7 +78,7 @@ def save_user(data):
         ON CONFLICT (chat_id) DO UPDATE
         SET role = EXCLUDED.role;
         """)
-        connection.execute(query, {"chat_id": data["chat_id"], "role": data["role"]})
+        connection.execute(query, {"chat_id": str(data["chat_id"]), "role": str(data["role"])})
 
 def save_client_to_db(data):
     """
@@ -85,14 +99,14 @@ def save_client_to_db(data):
             init_date = EXCLUDED.init_date;
         """)
         connection.execute(query, {
-            "chat_id": data["chat_id"],
-            "name": data["name"],
-            "lastname": data["lastname"],
-            "gender": data["gender"],
-            "id_card": data["id_card"],
-            "phone": data["phone"],
-            "membership": data["membership"],
-            "init_date": data["init_date"]
+            "chat_id": str(data["chat_id"]),
+            "name": str(data["name"]),
+            "lastname": str(data["lastname"]),
+            "gender": str(data["gender"]),
+            "id_card": str(data["id_card"]),
+            "phone": str(data["phone"]),
+            "membership": str(data["membership"]),
+            "init_date": datetime.strptime(data["init_date"], '%d/%m/%Y').strftime('%Y-%m-%d')
         })
 
 def save_worker_to_db(data):
@@ -111,11 +125,11 @@ def save_worker_to_db(data):
             phone = EXCLUDED.phone;
         """)
         connection.execute(query, {
-            "chat_id": data["chat_id"],
-            "name": data["name"],
-            "lastname": data["lastname"],
-            "id_card": data["id_card"],
-            "phone": data["phone"]
+            "chat_id": str(data["chat_id"]),
+            "name": str(data["name"]),
+            "lastname": str(data["lastname"]),
+            "id_card": str(data["id_card"]),
+            "phone": str(data["phone"])
         })
 
 def save_trainer_to_db(data):
@@ -134,11 +148,11 @@ def save_trainer_to_db(data):
             phone = EXCLUDED.phone;
         """)
         connection.execute(query, {
-            "chat_id": data["chat_id"],
-            "name": data["name"],
-            "lastname": data["lastname"],
-            "id_card": data["id_card"],
-            "phone": data["phone"]
+            "chat_id": str(data["chat_id"]),
+            "name": str(data["name"]),
+            "lastname": str(data["lastname"]),
+            "id_card": str(data["id_card"]),
+            "phone": str(data["phone"])
         })
 
 def get_role(chat_id):
@@ -147,41 +161,67 @@ def get_role(chat_id):
     """
     with engine.begin() as connection:
         query = text("SELECT role FROM users WHERE chat_id = :chat_id;")
-        result = connection.execute(query, {"chat_id": chat_id}).fetchone()
-        return result["role"] if result else None
+        result = connection.execute(query, {"chat_id": str(chat_id)})
+        result = result.fetchone()
+        return result[0] if result else None
 
 def get_payment_date(chat_id):
     """
     Get the payment date of a client by chat_id.
     """
+    try:
+        with engine.begin() as connection:
+            query = text("SELECT init_date FROM clients WHERE chat_id = :chat_id;")
+            result = connection.execute(query, {"chat_id": str(chat_id)})
+            result = result.fetchone()
+            return result[0] if result else None
+    except Exception as e:
+        return e
+
+def check_user(chat_id):
+    """
+    Check if a user exists in the database by chat_id.
+    """
     with engine.begin() as connection:
-        query = text("SELECT init_date FROM clients WHERE chat_id = :chat_id;")
-        result = connection.execute(query, {"chat_id": chat_id}).fetchone()
-        return result["init_date"] if result else None
+        query = text("SELECT EXISTS (SELECT 1 FROM progress WHERE chat_id = :chat_id);")
+        result = connection.execute(query, {"chat_id": str(chat_id)})
+        result = result.fetchone()
+        return result[0]
+    
+def save_progress(data):
+    # Guardar en la base de datos
+    with engine.begin() as connection:
+        query = text("""
+            INSERT INTO progress (chat_id, weight, height, age, imc, corporal_fat, measure_date)
+            VALUES (:chat_id, :weight, :height, :age, :bmi, :body_fat, :measure_date)
+        """)
+        connection.execute(query, {
+            "chat_id": data["chat_id"],
+            "weight": data["weight"],
+            "height": data["height"],
+            "age": data["age"],
+            "bmi": round(data["bmi"], 2),
+            "body_fat": round(data["body_fat"], 2),
+            "measure_date": datetime.now().strftime('%Y-%m-%d')
+        })
 
-# Example Usage
-if __name__ == "__main__":
-    initialize_db()
+def last_progress(chat_id):
+    # Obtener el último registro de progreso
+    with engine.begin() as connection:
+        query = text("SELECT * FROM progress WHERE chat_id = :chat_id ORDER BY measure_date DESC LIMIT 1;")
+        result = connection.execute(query, {"chat_id": str(chat_id)})
+        result = result.fetchone()
+        return result
 
-    # Save a user
-    save_user({"chat_id": "12345", "role": "admin"})
-
-    # Retrieve the user's role
-    role = get_role("12345")
-    print(f"User's role: {role}")
-
-    # Save a client
-    save_client_to_db({
-        "chat_id": "67890",
-        "name": "John",
-        "lastname": "Doe",
-        "gender": "Male",
-        "id_card": "12345678901",
-        "phone": "12345678",
-        "membership": "CrossFit",
-        "init_date": "2025-01-26",
-    })
-
-    # Retrieve a client's payment date
-    payment_date = get_payment_date("67890")
-    print(f"Client's payment date: {payment_date}")
+def get_user_data(chat_id):
+    """
+    Get the user data of a client by chat_id.
+    """
+    try:
+        with engine.begin() as connection:
+            query = text("SELECT gender, id_card FROM clients WHERE chat_id = :chat_id;")
+            result = connection.execute(query, {"chat_id": str(chat_id)})
+            result = result.fetchone()
+            return result if result else None
+    except Exception as e:
+        return e
