@@ -114,8 +114,18 @@ def handle_client_registration(bot, message, USER_STATE):
             bot.send_message(message.chat.id, "Por favor, selecciona una membresía válida: CrossFit, Musculación o Ambos.")
             return
         USER_STATE[message.chat.id]["membership"] = message.text
-        save_user(USER_STATE[message.chat.id])
-        save_client_to_db(USER_STATE[message.chat.id])
+        try:
+            save_user(USER_STATE[message.chat.id])
+        except Exception as e:
+            print(e)
+            bot.send_message(message.chat.id, "Ocurrió un error al guardar tus datos. Por favor, inténtalo de nuevo.")
+            return
+        try:
+            save_client_to_db(USER_STATE[message.chat.id])
+        except Exception as e:
+            print(e)
+            bot.send_message(message.chat.id, "Ocurrió un error al guardar tus datos. Por favor, inténtalo de nuevo.")
+            return
         bot.send_message(message.chat.id, "¡Registro completado con éxito! 🎉")
         del USER_STATE[message.chat.id]
         show_client_commands(bot, message.chat.id)
