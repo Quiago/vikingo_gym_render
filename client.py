@@ -118,13 +118,13 @@ def handle_client_registration(bot, message, USER_STATE):
             save_user(USER_STATE[message.chat.id])
         except Exception as e:
             print(e)
-            bot.send_message(message.chat.id, "Ocurrió un error al guardar tus datos. Por favor, inténtalo de nuevo.")
+            bot.send_message(message.chat.id, e)
             return
         try:
             save_client_to_db(USER_STATE[message.chat.id])
         except Exception as e:
             print(e)
-            bot.send_message(message.chat.id, "Ocurrió un error al guardar tus datos. Por favor, inténtalo de nuevo.")
+            bot.send_message(message.chat.id, e)
             return
         bot.send_message(message.chat.id, "¡Registro completado con éxito! 🎉")
         del USER_STATE[message.chat.id]
