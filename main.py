@@ -7,7 +7,7 @@ import telebot
 import toml
 import logging
 from handlers import handle_start, handle_role_selection
-from client import handle_client_registration, show_client_commands
+from client import handle_client_registration, show_client_commands, handle_fecha_pago
 from worker import handle_worker_registration, show_worker_commands
 from trainer import handle_trainer_registration, show_trainer_commands
 from database import initialize_db, get_role
@@ -68,6 +68,10 @@ def worker_registration_handler(message):
 @bot.message_handler(func=lambda message: message.chat.id in USER_STATE and USER_STATE[message.chat.id]["role"] == "entrenador")
 def trainer_registration_handler(message):
     handle_trainer_registration(bot, message, USER_STATE)
+
+@bot.message_handler(func=lambda message: message.text == "Mi Fecha de pago")
+def fecha_pago(message):
+    handle_fecha_pago(bot, message)
 
 @bot.message_handler(commands=['menu'])
 def show_menu_command(message):

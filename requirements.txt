@@ -3,3 +3,4 @@ uvicorn
 pytelegrambotapi
 toml
 psycopg2-binary
+sqlalchemy

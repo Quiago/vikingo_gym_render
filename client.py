@@ -1,6 +1,6 @@
 import re
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton
-from database import save_client_to_db, save_user
+from database import save_client_to_db, save_user, get_payment_date
 from datetime import datetime
 
 def show_client_commands(bot, chat_id):
@@ -12,6 +12,36 @@ def show_client_commands(bot, chat_id):
     markup.add(KeyboardButton("Pedir en la Cafeteria"))
     bot.send_message(chat_id, "Aquí están tus comandos disponibles como cliente:", reply_markup=markup)
 
+def handle_fecha_pago(bot, message):
+    """
+    Muestra la fecha de pago del cliente.
+    """
+    # Obtener la fecha de pago del cliente
+    date = get_payment_date(message.chat.id)
+    if not date:
+        bot.send_message(message.chat.id, "No se encontró una fecha de pago para tu usuario.")
+    else:
+        # Extract day from the payment date
+        payment_day = int(date.split("/")[0])
+        # Get current date
+        current_date = datetime.now()
+        # Create next payment date using current month and year
+        next_payment = datetime(current_date.year, current_date.month, payment_day)
+
+        # If payment day already passed this month, move to next month
+        if current_date.day > payment_day:
+            next_month = current_date.month + 1 if current_date.month < 12 else 1
+            next_year = current_date.year if current_date.month < 12 else current_date.year + 1
+            next_payment = datetime(next_year, next_month, payment_day)
+        else:
+            # Si el día actual es menor o igual al día de pago, es este mes
+            next_payment = datetime(current_date.year, current_date.month, payment_day)
+    
+        # Calcular días restantes, excluyendo el día actual y contando el día de pago
+        days_remaining = (next_payment - current_date).days
+        payment_msg = f"Tu fecha de pago es el día {next_payment.day} de cada mes.\nPróximo pago: {next_payment.strftime('%d/%m/%Y')}\nDías restantes: {days_remaining}"
+        bot.send_message(message.chat.id, payment_msg)
+        return
 def handle_client_registration(bot, message, USER_STATE):
     """
     Recoge los datos del cliente paso a paso con validaciones.
